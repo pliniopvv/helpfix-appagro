@@ -1,3 +1,4 @@
+import datetime
 import streamlit as st
 import pandas as pd
 import plotly.express as px
@@ -25,6 +26,7 @@ class DataInvestApp:
         try:
             separator = st.sidebar.text_input("Digite o separador (ex: , ou ;)", ";")  # Pergunte ao usuário pelo separador
             self.df = pd.read_csv(os.path.join("csv", self.selected_file), sep=separator)
+            self.df['DATAf'] = pd.to_datetime(self.df['DATA'], format="%d/%m/%Y")
         except Exception as e:
             st.error(f"Erro ao carregar o arquivo CSV: {e}")
             st.stop()
@@ -32,8 +34,15 @@ class DataInvestApp:
     def run(self):
         # Sidebar para filtros de data
         st.sidebar.header("Filtros")
-        start_date = st.sidebar.date_input("Data de Início", min_value=self.df['Data'].min(), max_value=self.df['Data'].max())
-        end_date = st.sidebar.date_input("Data de Término", min_value=self.df['Data'].min(), max_value=self.df['Data'].max())
+        
+        min_date = self.df['DATAf'].min()
+        max_date = self.df['DATAf'].max()
+
+        min_datef = datetime.date(min_date.year, min_date.month, min_date.day)
+        max_datef = datetime.date(max_date.year, max_date.month, max_date.day)
+
+        start_date = st.sidebar.date_input("Data de Início", value = min_datef, min_value=min_datef, max_value=max_datef)
+        end_date = st.sidebar.date_input("Data de Término", value = min_datef, min_value=min_datef, max_value=max_datef)
 
         # Botão "Validar"
         if st.sidebar.button("Validar"):
